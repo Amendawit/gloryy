@@ -1,0 +1,1350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glory Coding Club</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════
+   ROOT & RESET
+═══════════════════════════════════════════ */
+:root {
+  --navy:#0a1628; --navy2:#0d1f3c; --navy3:#0f2848;
+  --blue:#1a56db; --blue2:#2563eb; --blue3:#1d4ed8;
+  --accent:#00d4ff; --accent2:#38bdf8; --accent3:#7dd3fc;
+  --gold:#f59e0b; --green:#10b981; --red:#ef4444; --purple:#8b5cf6;
+  --text:#e2e8f0; --muted:#94a3b8; --dim:#475569;
+  --card:rgba(13,31,60,0.85); --card2:rgba(15,40,72,0.9);
+  --border:rgba(0,212,255,0.12); --border2:rgba(0,212,255,0.25);
+  --glow:0 0 40px rgba(0,212,255,0.08);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Space Grotesk',sans-serif;background:var(--navy);color:var(--text);min-height:100vh;overflow-x:hidden;}
+button{font-family:'Space Grotesk',sans-serif;cursor:pointer;}
+a{text-decoration:none;}
+input,textarea{font-family:'Space Grotesk',sans-serif;}
+
+/* ═══════════════════════════════════════════
+   BACKGROUND & STARS
+═══════════════════════════════════════════ */
+#bg-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+.bg-glow{
+  position:fixed;z-index:0;pointer-events:none;border-radius:50%;filter:blur(80px);
+}
+.bg-glow.g1{width:600px;height:600px;top:-100px;left:-100px;background:radial-gradient(circle,rgba(26,86,219,0.12) 0%,transparent 70%);}
+.bg-glow.g2{width:500px;height:500px;top:30%;right:-100px;background:radial-gradient(circle,rgba(0,212,255,0.08) 0%,transparent 70%);}
+.bg-glow.g3{width:400px;height:400px;bottom:-50px;left:30%;background:radial-gradient(circle,rgba(139,92,246,0.08) 0%,transparent 70%);}
+
+/* ═══════════════════════════════════════════
+   PAGE SYSTEM
+═══════════════════════════════════════════ */
+.page{display:none;position:relative;z-index:1;min-height:100vh;}
+.page.active{display:block;}
+
+/* ═══════════════════════════════════════════
+   ██ LOGIN PAGE
+═══════════════════════════════════════════ */
+#pg-login{display:flex;align-items:center;justify-content:center;padding:20px;}
+.login-wrap{width:100%;max-width:440px;}
+
+.login-card{
+  background:var(--card);border:1px solid var(--border);border-radius:28px;
+  padding:52px 44px;backdrop-filter:blur(24px);
+  box-shadow:0 0 0 1px rgba(255,255,255,0.03),0 40px 80px rgba(0,0,0,0.5),var(--glow);
+  animation:slideUp .6s ease both;
+}
+@keyframes slideUp{from{opacity:0;transform:translateY(32px)}to{opacity:1;transform:translateY(0)}}
+
+.login-logo{text-align:center;margin-bottom:36px;}
+.login-logo img{
+  width:96px;height:96px;object-fit:contain;
+  filter:drop-shadow(0 0 24px rgba(0,212,255,0.4));
+  animation:logoFloat 3.5s ease-in-out infinite;
+}
+@keyframes logoFloat{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-10px) rotate(2deg)}}
+.login-club-name{
+  font-size:1.6rem;font-weight:800;margin-top:14px;
+  background:linear-gradient(135deg,#fff 20%,var(--accent) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:-0.5px;
+}
+.login-subtitle{color:var(--muted);font-size:0.88rem;margin-top:5px;letter-spacing:.3px;}
+
+.auth-tabs{display:flex;background:rgba(0,0,0,0.35);border-radius:14px;padding:5px;margin-bottom:32px;}
+.auth-tab{
+  flex:1;padding:11px;border:none;background:transparent;
+  color:var(--muted);font-size:0.95rem;font-weight:700;
+  border-radius:10px;transition:all .3s;letter-spacing:.3px;
+}
+.auth-tab.active{background:var(--blue);color:white;box-shadow:0 4px 18px rgba(26,86,219,0.45);}
+
+.msg-box{
+  padding:13px 16px;border-radius:12px;font-size:0.88rem;
+  margin-bottom:16px;display:none;align-items:center;gap:10px;
+}
+.msg-box.error{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);color:#fca5a5;}
+.msg-box.success{background:rgba(16,185,129,0.12);border:1px solid rgba(16,185,129,0.3);color:#6ee7b7;}
+
+.field{position:relative;margin-bottom:15px;}
+.field .ico{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--dim);font-size:.9rem;pointer-events:none;}
+.field input{
+  width:100%;padding:14px 46px;background:rgba(0,0,0,0.4);
+  border:1px solid rgba(255,255,255,0.08);border-radius:13px;
+  color:white;font-size:1rem;transition:all .3s;
+}
+.field input:focus{outline:none;border-color:var(--accent);background:rgba(0,0,0,0.5);box-shadow:0 0 0 3px rgba(0,212,255,0.1);}
+.field input::placeholder{color:var(--dim);}
+.eye-btn{position:absolute;right:14px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--dim);padding:4px;transition:color .2s;}
+.eye-btn:hover{color:var(--accent);}
+
+.primary-btn{
+  width:100%;padding:15px;border:none;border-radius:13px;
+  background:linear-gradient(135deg,var(--blue) 0%,#1d4ed8 100%);
+  color:white;font-size:1rem;font-weight:800;
+  transition:all .3s;letter-spacing:.5px;
+  box-shadow:0 8px 28px rgba(26,86,219,0.4);
+}
+.primary-btn:hover{transform:translateY(-2px);box-shadow:0 14px 38px rgba(26,86,219,0.55);}
+.primary-btn:active{transform:translateY(0);}
+.primary-btn:disabled{opacity:.5;transform:none;cursor:not-allowed;}
+
+/* ═══════════════════════════════════════════
+   ██ WELCOME / SPLASH PAGE
+═══════════════════════════════════════════ */
+#pg-welcome{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  min-height:100vh;text-align:center;padding:40px 20px;
+}
+.welcome-splash{max-width:700px;animation:fadeIn .8s ease both;}
+@keyframes fadeIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:scale(1)}}
+.welcome-logo img{
+  width:130px;height:130px;object-fit:contain;
+  filter:drop-shadow(0 0 40px rgba(0,212,255,0.6));
+  animation:logoFloat 3s ease-in-out infinite;
+}
+.welcome-greeting{
+  font-size:clamp(1rem,3vw,1.2rem);color:var(--accent);
+  font-weight:700;letter-spacing:2px;text-transform:uppercase;
+  margin:24px 0 10px;
+}
+.welcome-title{
+  font-size:clamp(2.2rem,6vw,4rem);font-weight:800;line-height:1.1;
+  margin-bottom:20px;letter-spacing:-1px;
+}
+.welcome-title span{
+  background:linear-gradient(135deg,var(--accent) 0%,#818cf8 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.welcome-sub{color:var(--muted);font-size:1.1rem;max-width:500px;margin:0 auto 40px;line-height:1.7;}
+.welcome-stats{
+  display:flex;justify-content:center;gap:48px;flex-wrap:wrap;
+  margin-bottom:44px;
+}
+.ws-stat .num{
+  font-size:2.2rem;font-weight:800;color:var(--accent);
+  font-family:'JetBrains Mono',monospace;
+}
+.ws-stat .lbl{font-size:.82rem;color:var(--muted);margin-top:2px;text-transform:uppercase;letter-spacing:1px;}
+.welcome-enter-btn{
+  display:inline-flex;align-items:center;gap:12px;
+  padding:18px 44px;border:none;border-radius:50px;
+  background:linear-gradient(135deg,var(--blue) 0%,var(--accent) 100%);
+  color:white;font-size:1.1rem;font-weight:800;
+  transition:all .4s;box-shadow:0 16px 40px rgba(0,212,255,0.3);
+  letter-spacing:.5px;
+}
+.welcome-enter-btn:hover{transform:translateY(-4px) scale(1.04);box-shadow:0 24px 60px rgba(0,212,255,0.45);}
+.typing-line{
+  font-family:'JetBrains Mono',monospace;font-size:.9rem;
+  color:var(--accent);margin-bottom:32px;
+  border-right:2px solid var(--accent);padding-right:4px;
+  display:inline-block;white-space:nowrap;overflow:hidden;
+  animation:typing 3.5s steps(40) infinite,blink .7s step-end infinite;
+}
+@keyframes typing{0%{width:0}60%{width:100%}90%{width:100%}100%{width:0}}
+@keyframes blink{0%,100%{border-color:var(--accent)}50%{border-color:transparent}}
+
+/* ═══════════════════════════════════════════
+   ██ MAIN APP HEADER
+═══════════════════════════════════════════ */
+.app-header{
+  position:sticky;top:0;z-index:200;
+  background:rgba(10,22,40,0.92);backdrop-filter:blur(24px);
+  border-bottom:1px solid var(--border);padding:15px 36px;
+  display:flex;align-items:center;justify-content:space-between;gap:16px;
+}
+.hdr-brand{display:flex;align-items:center;gap:14px;}
+.hdr-brand img{width:42px;height:42px;object-fit:contain;}
+.hdr-brand-text h1{font-size:1.05rem;font-weight:800;color:white;letter-spacing:-.3px;}
+.hdr-brand-text p{font-size:.75rem;color:var(--accent);font-family:'JetBrains Mono',monospace;}
+.hdr-nav{display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+.nav-pill{
+  display:flex;align-items:center;gap:7px;
+  padding:8px 16px;border-radius:50px;border:none;
+  background:transparent;color:var(--muted);font-size:.85rem;font-weight:700;
+  transition:all .25s;letter-spacing:.2px;
+}
+.nav-pill:hover,.nav-pill.active{background:rgba(0,212,255,0.1);color:var(--accent);}
+.nav-pill.active{border:1px solid var(--border2);}
+.hdr-right{display:flex;align-items:center;gap:12px;}
+.user-chip{
+  display:flex;align-items:center;gap:10px;
+  background:var(--card);border:1px solid var(--border);
+  padding:7px 16px 7px 8px;border-radius:50px;
+}
+.user-ava{
+  width:30px;height:30px;border-radius:50%;
+  background:linear-gradient(135deg,var(--blue),var(--accent));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:.82rem;color:white;
+}
+.user-chip span{font-weight:700;font-size:.88rem;}
+.logout-pill{
+  display:flex;align-items:center;gap:7px;
+  padding:8px 16px;border-radius:50px;
+  background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);
+  color:#fca5a5;font-size:.85rem;font-weight:700;transition:all .25s;
+}
+.logout-pill:hover{background:rgba(239,68,68,0.2);}
+
+/* ═══════════════════════════════════════════
+   ██ SECTIONS (tab content)
+═══════════════════════════════════════════ */
+.tab-section{display:none;padding:0 36px 64px;}
+.tab-section.active{display:block;}
+
+/* ── Dashboard / Home ── */
+.dash-hero{
+  padding:56px 0 48px;text-align:center;max-width:800px;margin:0 auto;
+}
+.dash-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  background:rgba(0,212,255,0.08);border:1px solid var(--border2);
+  padding:6px 18px;border-radius:50px;font-size:.8rem;
+  color:var(--accent);font-weight:700;margin-bottom:22px;letter-spacing:.5px;
+  text-transform:uppercase;
+}
+.dash-title{
+  font-size:clamp(2rem,5vw,3.2rem);font-weight:800;
+  line-height:1.12;margin-bottom:14px;letter-spacing:-1px;
+}
+.dash-title span{
+  background:linear-gradient(135deg,var(--accent) 0%,#818cf8 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.dash-sub{color:var(--muted);font-size:1rem;max-width:520px;margin:0 auto 40px;line-height:1.7;}
+.dash-stats{display:flex;justify-content:center;gap:48px;flex-wrap:wrap;}
+.ds-stat .n{font-size:2rem;font-weight:800;color:var(--accent);font-family:'JetBrains Mono',monospace;}
+.ds-stat .l{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;}
+
+.progress-bar-card{
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:26px 30px;display:flex;align-items:center;gap:24px;
+  flex-wrap:wrap;margin:0 0 40px;
+}
+.pb-icon{
+  width:54px;height:54px;border-radius:16px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--blue),var(--accent));
+  display:flex;align-items:center;justify-content:center;font-size:1.5rem;
+}
+.pb-body{flex:1;min-width:180px;}
+.pb-body h4{font-weight:800;margin-bottom:3px;}
+.pb-body p{font-size:.83rem;color:var(--muted);margin-bottom:10px;}
+.xp-rail{background:rgba(255,255,255,0.06);border-radius:50px;height:9px;}
+.xp-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--blue),var(--accent));transition:width 1s ease;}
+.xp-nums{display:flex;justify-content:space-between;font-size:.73rem;color:var(--muted);margin-top:5px;}
+.level-chip{background:linear-gradient(135deg,var(--gold),#ef4444);padding:7px 20px;border-radius:50px;font-weight:800;font-size:.88rem;color:white;white-space:nowrap;}
+
+/* Quick actions */
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:14px;margin-bottom:40px;}
+.quick-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:22px 16px;text-align:center;cursor:pointer;transition:all .3s;
+}
+.quick-card:hover{transform:translateY(-5px);border-color:var(--border2);}
+.quick-card i{font-size:1.8rem;margin-bottom:10px;display:block;}
+.quick-card h4{font-weight:700;font-size:.9rem;margin-bottom:4px;}
+.quick-card p{font-size:.76rem;color:var(--muted);}
+
+/* ── Events ── */
+.events-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;}
+.ev-card{
+  background:var(--card);border:1px solid var(--border);border-radius:20px;
+  padding:26px;transition:all .3s;position:relative;overflow:hidden;
+}
+.ev-card::after{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,var(--blue),var(--accent));
+  transform:scaleX(0);transform-origin:left;transition:transform .3s;
+}
+.ev-card:hover{transform:translateY(-5px);border-color:var(--border2);}
+.ev-card:hover::after{transform:scaleX(1);}
+.ev-date{
+  display:inline-flex;align-items:center;gap:7px;
+  background:rgba(26,86,219,0.15);border:1px solid rgba(26,86,219,0.3);
+  color:var(--accent2);padding:5px 13px;border-radius:8px;
+  font-size:.78rem;font-weight:700;font-family:'JetBrains Mono',monospace;
+  margin-bottom:14px;
+}
+.ev-card h4{font-size:1.05rem;font-weight:800;margin-bottom:8px;}
+.ev-card p{color:var(--muted);font-size:.86rem;line-height:1.65;margin-bottom:16px;}
+.ev-meta{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:16px;}
+.ev-meta span{display:flex;align-items:center;gap:5px;font-size:.78rem;color:var(--muted);}
+.ev-reg-btn{
+  width:100%;padding:11px;border-radius:11px;
+  border:1px solid var(--border2);background:transparent;
+  color:var(--accent);font-weight:700;font-size:.9rem;transition:all .3s;
+}
+.ev-reg-btn:hover{background:rgba(0,212,255,0.08);}
+.ev-reg-btn.done{background:rgba(16,185,129,0.1);border-color:rgba(16,185,129,0.35);color:var(--green);}
+
+/* ── Challenges ── */
+.ch-list{display:flex;flex-direction:column;gap:14px;}
+.ch-card{
+  background:var(--card);border:1px solid var(--border);border-radius:18px;
+  padding:22px 26px;display:flex;align-items:center;gap:20px;
+  cursor:pointer;transition:all .3s;
+}
+.ch-card:hover{transform:translateX(6px);border-color:var(--border2);box-shadow:var(--glow);}
+.ch-ico{
+  width:54px;height:54px;border-radius:15px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.4rem;flex-shrink:0;
+}
+.ch-ico.easy{background:rgba(16,185,129,0.12);color:var(--green);}
+.ch-ico.medium{background:rgba(245,158,11,0.12);color:var(--gold);}
+.ch-ico.hard{background:rgba(239,68,68,0.12);color:var(--red);}
+.ch-ico.expert{background:rgba(139,92,246,0.12);color:var(--purple);}
+.ch-body{flex:1;}
+.ch-body h4{font-size:1rem;font-weight:800;margin-bottom:5px;}
+.ch-body p{color:var(--muted);font-size:.84rem;}
+.ch-right{text-align:right;flex-shrink:0;}
+.diff-tag{
+  display:inline-block;padding:4px 13px;border-radius:20px;
+  font-size:.72rem;font-weight:800;letter-spacing:.5px;margin-bottom:5px;
+}
+.diff-tag.easy{background:rgba(16,185,129,0.12);color:var(--green);}
+.diff-tag.medium{background:rgba(245,158,11,0.12);color:var(--gold);}
+.diff-tag.hard{background:rgba(239,68,68,0.12);color:var(--red);}
+.diff-tag.expert{background:rgba(139,92,246,0.12);color:var(--purple);}
+.ch-pts{font-size:.8rem;color:var(--muted);}
+.ch-pts strong{color:var(--accent);}
+
+/* ── Leaderboard ── */
+.lb-list{display:flex;flex-direction:column;gap:12px;}
+.lb-row{
+  display:flex;align-items:center;gap:16px;
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:16px 22px;transition:all .3s;
+}
+.lb-row:hover{transform:translateX(4px);}
+.lb-row.me{border-color:var(--border2);background:rgba(0,212,255,0.04);}
+.lb-rank-num{width:38px;text-align:center;font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.1rem;}
+.rank-gold{color:#fbbf24;} .rank-silver{color:#94a3b8;} .rank-bronze{color:#cd7c2f;} .rank-other{color:var(--dim);font-size:.9rem;}
+.lb-ava{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.9rem;flex-shrink:0;}
+.lb-info{flex:1;}
+.lb-info .name{font-weight:800;font-size:.95rem;}
+.lb-badges{display:flex;gap:5px;flex-wrap:wrap;margin-top:4px;}
+.lb-badge{display:inline-block;padding:2px 8px;border-radius:5px;font-size:.7rem;font-weight:700;background:rgba(0,212,255,0.08);color:var(--accent);}
+.lb-xp{font-family:'JetBrains Mono',monospace;font-weight:800;font-size:1.1rem;color:var(--accent);}
+.lb-xp small{display:block;font-size:.7rem;color:var(--muted);text-align:right;font-family:inherit;}
+
+/* ── Resources ── */
+.res-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;}
+.res-card{
+  background:var(--card);border:1px solid var(--border);border-radius:16px;
+  padding:24px 20px;text-align:center;transition:all .3s;cursor:pointer;
+  color:inherit;
+}
+.res-card:hover{transform:translateY(-5px);border-color:var(--border2);}
+.res-card i{font-size:2rem;margin-bottom:12px;display:block;}
+.res-card h4{font-weight:800;margin-bottom:5px;font-size:.95rem;}
+.res-card p{font-size:.8rem;color:var(--muted);}
+
+/* ═══════════════════════════════════════════
+   ██ ADMIN PANEL
+═══════════════════════════════════════════ */
+.admin-bar{
+  background:rgba(245,158,11,0.06);border-bottom:1px solid rgba(245,158,11,0.2);
+  padding:10px 36px;display:flex;align-items:center;gap:8px;
+  font-size:.82rem;color:var(--gold);font-weight:700;
+}
+.admin-topnav{
+  display:flex;gap:8px;flex-wrap:wrap;
+  padding:20px 36px 0;
+}
+.admin-nav-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 20px;border-radius:12px;
+  border:1px solid var(--border);background:transparent;
+  color:var(--muted);font-weight:700;font-size:.88rem;transition:all .3s;
+}
+.admin-nav-btn.active,.admin-nav-btn:hover{
+  background:rgba(26,86,219,0.15);border-color:var(--border2);color:var(--accent);
+}
+.admin-section{display:none;padding:24px 36px 64px;}
+.admin-section.active{display:block;}
+.admin-stats-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-bottom:28px;}
+.admin-stat-card{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:24px;text-align:center;transition:transform .3s;
+}
+.admin-stat-card:hover{transform:translateY(-4px);}
+.admin-stat-card .asn{font-size:2.4rem;font-weight:800;color:var(--accent);font-family:'JetBrains Mono',monospace;}
+.admin-stat-card .asl{color:var(--muted);font-size:.85rem;font-weight:700;margin-top:4px;}
+.section-hd{
+  font-size:1.2rem;font-weight:800;margin-bottom:22px;
+  display:flex;align-items:center;gap:10px;
+}
+.section-hd i{color:var(--accent);}
+.data-tbl{width:100%;border-collapse:collapse;background:var(--card);border-radius:16px;overflow:hidden;}
+.data-tbl th{background:var(--blue);color:white;padding:14px 16px;text-align:left;font-size:.85rem;font-weight:800;}
+.data-tbl td{padding:13px 16px;border-bottom:1px solid rgba(255,255,255,0.04);font-size:.88rem;}
+.data-tbl tr:hover td{background:rgba(255,255,255,0.02);}
+.tbl-wrap{overflow-x:auto;border-radius:16px;}
+.badge-pill{padding:4px 12px;border-radius:20px;font-size:.75rem;font-weight:700;}
+.badge-pill.green{background:rgba(16,185,129,0.12);color:var(--green);}
+.badge-pill.blue{background:rgba(26,86,219,0.12);color:var(--accent2);}
+.badge-pill.gold{background:rgba(245,158,11,0.12);color:var(--gold);}
+.del-btn{
+  padding:5px 12px;border-radius:7px;border:none;
+  background:rgba(239,68,68,0.12);color:var(--red);
+  font-size:.78rem;font-weight:700;transition:all .25s;
+}
+.del-btn:hover{background:var(--red);color:white;}
+.admin-search{
+  width:100%;max-width:320px;padding:11px 16px;
+  background:rgba(0,0,0,0.4);border:1px solid var(--border);
+  border-radius:12px;color:white;font-size:.95rem;margin-bottom:20px;
+}
+.admin-search:focus{outline:none;border-color:var(--accent);}
+.admin-action-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:24px;}
+.admin-btn{
+  display:flex;align-items:center;gap:8px;
+  padding:11px 22px;border-radius:12px;border:none;
+  font-weight:700;font-size:.88rem;transition:all .3s;
+}
+.admin-btn.green{background:rgba(16,185,129,0.15);color:var(--green);border:1px solid rgba(16,185,129,0.3);}
+.admin-btn.green:hover{background:var(--green);color:white;}
+.admin-btn.blue{background:rgba(26,86,219,0.15);color:var(--accent2);border:1px solid var(--border);}
+.admin-btn.blue:hover{background:var(--blue);color:white;}
+.ev-reg-block{
+  background:var(--card);border:1px solid var(--border);
+  border-radius:16px;padding:22px;margin-bottom:16px;
+  border-left:3px solid var(--blue);
+}
+.ev-reg-hdr{display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;margin-bottom:14px;}
+.ev-reg-hdr h4{font-weight:800;}
+.reg-person{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.04);
+  font-size:.88rem;
+}
+.reg-person:last-child{border:none;}
+
+/* Add Event Modal */
+.modal-bg{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);
+  z-index:500;justify-content:center;align-items:center;padding:20px;
+  backdrop-filter:blur(6px);
+}
+.modal-bg.open{display:flex;}
+.modal-box{
+  background:var(--navy2);border:1px solid var(--border);border-radius:24px;
+  padding:36px;width:100%;max-width:520px;
+  max-height:90vh;overflow-y:auto;
+  animation:popIn .3s ease both;position:relative;
+}
+@keyframes popIn{from{opacity:0;transform:scale(.9)}to{opacity:1;transform:scale(1)}}
+.modal-close{
+  position:absolute;top:16px;right:18px;
+  background:none;border:none;color:var(--muted);font-size:1.2rem;transition:color .2s;
+}
+.modal-close:hover{color:white;}
+.modal-title{font-size:1.25rem;font-weight:800;margin-bottom:24px;}
+.modal-field{margin-bottom:16px;}
+.modal-field label{display:block;font-size:.83rem;font-weight:700;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px;}
+.modal-field input,.modal-field textarea,.modal-field select{
+  width:100%;padding:12px 14px;background:rgba(0,0,0,0.4);
+  border:1px solid var(--border);border-radius:11px;
+  color:white;font-size:.95rem;resize:vertical;
+}
+.modal-field input:focus,.modal-field textarea:focus{outline:none;border-color:var(--accent);}
+.modal-field select option{background:var(--navy2);}
+.modal-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;}
+.modal-cancel{padding:11px 22px;border-radius:11px;border:1px solid var(--border);background:transparent;color:var(--muted);font-weight:700;transition:all .25s;}
+.modal-cancel:hover{border-color:var(--muted);color:white;}
+.modal-save{padding:11px 24px;border-radius:11px;border:none;background:var(--blue);color:white;font-weight:800;transition:all .25s;}
+.modal-save:hover{background:var(--blue2);}
+
+/* ═══════════════════════════════════════════
+   ██ QUIZ ENGINE MODAL
+═══════════════════════════════════════════ */
+#quiz-modal{z-index:600;}
+.quiz-box{background:var(--navy2);}
+.qz-prog-wrap{background:rgba(255,255,255,0.06);border-radius:50px;height:7px;margin:16px 0 8px;}
+.qz-prog-fill{height:100%;border-radius:50px;background:linear-gradient(90deg,var(--blue),var(--accent));transition:width .4s ease;}
+.qz-qnum{font-size:.8rem;color:var(--muted);margin-bottom:20px;}
+.qz-q{font-size:1.05rem;font-weight:700;margin-bottom:22px;line-height:1.55;}
+.qz-q.code-q{font-family:'JetBrains Mono',monospace;background:rgba(0,0,0,0.4);padding:16px;border-radius:12px;border-left:3px solid var(--accent);font-size:.9rem;}
+.qz-opts{display:flex;flex-direction:column;gap:10px;}
+.qz-opt{
+  padding:14px 18px;border-radius:13px;border:1px solid rgba(255,255,255,0.08);
+  background:rgba(0,0,0,0.3);color:var(--text);font-size:.93rem;font-weight:600;
+  cursor:pointer;transition:all .25s;text-align:left;
+}
+.qz-opt:hover:not(.disabled){border-color:var(--accent);color:var(--accent);background:rgba(0,212,255,0.05);}
+.qz-opt.correct{border-color:var(--green);background:rgba(16,185,129,0.1);color:#6ee7b7;}
+.qz-opt.wrong{border-color:var(--red);background:rgba(239,68,68,0.1);color:#fca5a5;}
+.qz-opt.disabled{pointer-events:none;}
+.qz-explain{
+  margin-top:14px;padding:14px 18px;border-radius:12px;
+  font-size:.88rem;line-height:1.6;display:none;
+}
+.qz-explain.ok{background:rgba(16,185,129,0.08);border:1px solid rgba(16,185,129,0.25);color:#86efac;}
+.qz-explain.no{background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.25);color:#fca5a5;}
+.qz-next{
+  margin-top:18px;width:100%;padding:14px;border:none;border-radius:13px;
+  background:linear-gradient(135deg,var(--blue),var(--blue2));
+  color:white;font-weight:800;font-size:1rem;display:none;transition:all .3s;
+}
+.qz-next:hover{transform:translateY(-2px);}
+.result-circle{
+  width:110px;height:110px;border-radius:50%;margin:0 auto 20px;
+  background:linear-gradient(135deg,var(--blue),var(--accent));
+  display:flex;align-items:center;justify-content:center;
+  font-size:2rem;font-weight:800;color:white;font-family:'JetBrains Mono',monospace;
+}
+.result-msg{font-size:1.1rem;color:var(--muted);margin:8px 0 16px;}
+.result-xp{font-size:1.2rem;font-weight:800;color:var(--gold);margin-bottom:28px;}
+.result-back{
+  padding:13px 30px;border-radius:12px;
+  background:rgba(0,212,255,0.08);border:1px solid var(--border2);
+  color:var(--accent);font-weight:800;transition:all .3s;
+}
+.result-back:hover{background:rgba(0,212,255,0.15);}
+
+/* ═══════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════ */
+#toast{
+  position:fixed;bottom:30px;right:30px;z-index:999;
+  background:var(--navy3);border:1px solid var(--border);border-radius:16px;
+  padding:15px 22px;max-width:340px;
+  box-shadow:0 20px 50px rgba(0,0,0,0.5);
+  display:flex;align-items:center;gap:12px;
+  transform:translateX(180%);transition:transform .4s cubic-bezier(.175,.885,.32,1.275);
+}
+#toast.show{transform:translateX(0);}
+#toast i{font-size:1.1rem;}
+#toast.success i{color:var(--green);}
+#toast.info i{color:var(--accent);}
+#toast.gold i{color:var(--gold);}
+#toast span{font-size:.9rem;font-weight:600;}
+
+/* Floating particles */
+.particle{position:fixed;pointer-events:none;z-index:999;border-radius:50%;animation:particleUp 1.2s ease-out forwards;}
+@keyframes particleUp{0%{transform:translateY(0) scale(1);opacity:1}100%{transform:translateY(-120px) scale(0);opacity:0}}
+
+/* ─── responsive ─── */
+@media(max-width:720px){
+  .app-header{padding:12px 16px;flex-wrap:wrap;}
+  .hdr-nav{display:none;}
+  .tab-section,.admin-section,.admin-topnav{padding-left:16px;padding-right:16px;}
+  .admin-bar{padding:10px 16px;}
+  .dash-hero{padding:36px 0 32px;}
+  .login-card{padding:36px 28px;}
+  .ch-card{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<!-- BG -->
+<div class="bg-glow g1"></div>
+<div class="bg-glow g2"></div>
+<div class="bg-glow g3"></div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 1 — LOGIN
+══════════════════════════════════════════════ -->
+<div class="page active" id="pg-login">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;position:relative;z-index:1;">
+    <div class="login-wrap">
+      <div class="login-card">
+        <div class="login-logo">
+          <img src="club_logo.png" alt="Glory Coding Club" id="login-logo-img">
+          <div class="login-club-name">Glory Coding Club</div>
+          <div class="login-subtitle">Glory Secondary School · Est. 2024</div>
+        </div>
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+          <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+        </div>
+        <div class="msg-box error" id="err-box"><i class="fas fa-exclamation-circle"></i><span id="err-txt"></span></div>
+        <div class="msg-box success" id="ok-box"><i class="fas fa-check-circle"></i><span id="ok-txt"></span></div>
+        <!-- Login -->
+        <div id="form-login">
+          <div class="field"><i class="fas fa-user ico"></i><input type="text" id="l-user" placeholder="Username" autocomplete="off"><button class="eye-btn" style="display:none"></button></div>
+          <div class="field"><i class="fas fa-lock ico"></i><input type="password" id="l-pass" placeholder="Password"><button class="eye-btn" onclick="togglePw('l-pass',this)"><i class="fas fa-eye"></i></button></div>
+          <button class="primary-btn" onclick="doLogin()" id="login-submit-btn"><i class="fas fa-sign-in-alt"></i> &nbsp;Login</button>
+        </div>
+        <!-- Register -->
+        <div id="form-register" style="display:none">
+          <div class="field"><i class="fas fa-user ico"></i><input type="text" id="r-user" placeholder="Choose a username" autocomplete="off"></div>
+          <div class="field"><i class="fas fa-lock ico"></i><input type="password" id="r-pass" placeholder="Create a password"><button class="eye-btn" onclick="togglePw('r-pass',this)"><i class="fas fa-eye"></i></button></div>
+          <div class="field"><i class="fas fa-lock ico"></i><input type="password" id="r-confirm" placeholder="Confirm password"></div>
+          <button class="primary-btn" onclick="doRegister()"><i class="fas fa-user-plus"></i> &nbsp;Create Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 2 — WELCOME SPLASH
+══════════════════════════════════════════════ -->
+<div class="page" id="pg-welcome">
+  <div style="min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;position:relative;z-index:1;text-align:center;">
+    <div class="welcome-splash" id="welcomeSplash">
+      <div class="welcome-logo"><img src="club_logo.png" alt="Logo" style="width:130px;height:130px;object-fit:contain;filter:drop-shadow(0 0 40px rgba(0,212,255,0.6));animation:logoFloat 3s ease-in-out infinite;"></div>
+      <div class="welcome-greeting">✦ Welcome to the Family ✦</div>
+      <h2 class="welcome-title">Hello, <span id="w-username">Coder</span>! 🚀</h2>
+      <div class="typing-line" id="typing-line">print("Ready to code? Let's go!")</div>
+      <p class="welcome-sub">You've joined the Glory Coding Club. Solve challenges, earn XP, and compete with your peers. Your coding journey starts NOW.</p>
+      <div class="welcome-stats">
+        <div class="ws-stat"><div class="num" id="w-members">0</div><div class="lbl">Members</div></div>
+        <div class="ws-stat"><div class="num" id="w-events">0</div><div class="lbl">Events</div></div>
+        <div class="ws-stat"><div class="num" id="w-challenges">12</div><div class="lbl">Challenges</div></div>
+      </div>
+      <button class="welcome-enter-btn" onclick="enterApp()">
+        <i class="fas fa-rocket"></i> Enter the Club &nbsp;→
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     PAGE 3 — MAIN APP
+══════════════════════════════════════════════ -->
+<div class="page" id="pg-app">
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="hdr-brand">
+      <img src="club_logo.png" alt="Logo" onerror="this.style.display='none'">
+      <div class="hdr-brand-text">
+        <h1>Glory Coding Club</h1>
+        <p>▸ powered by curiosity</p>
+      </div>
+    </div>
+    <nav class="hdr-nav">
+      <button class="nav-pill active" onclick="showTab('home')"><i class="fas fa-home"></i> Home</button>
+      <button class="nav-pill" onclick="showTab('events')"><i class="fas fa-calendar"></i> Events</button>
+      <button class="nav-pill" onclick="showTab('challenges')"><i class="fas fa-trophy"></i> Challenges</button>
+      <button class="nav-pill" onclick="showTab('leaderboard')"><i class="fas fa-crown"></i> Leaderboard</button>
+      <button class="nav-pill" onclick="showTab('resources')"><i class="fas fa-book"></i> Resources</button>
+      <button class="nav-pill admin-only" id="admin-nav-btn" onclick="showTab('admin')" style="display:none"><i class="fas fa-crown" style="color:var(--gold)"></i> Admin</button>
+    </nav>
+    <div class="hdr-right">
+      <div class="user-chip"><div class="user-ava" id="hdr-ava">G</div><span id="hdr-name">User</span></div>
+      <button class="logout-pill" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </div>
+  </header>
+
+  <!-- ── HOME TAB ── -->
+  <div class="tab-section active" id="tab-home">
+    <div class="dash-hero">
+      <div class="dash-badge"><i class="fas fa-bolt"></i>FAMILY DAY 2025 — WELCOME!</div>
+      <h2 class="dash-title">Where Future <span>Innovators</span><br>Are Made ✦</h2>
+      <p class="dash-sub">Solve challenges, earn XP, register for events, and compete on the leaderboard. The code is yours to write!</p>
+      <div class="dash-stats">
+        <div class="ds-stat"><div class="n" id="s-members">0</div><div class="l">Members</div></div>
+        <div class="ds-stat"><div class="n" id="s-events">4</div><div class="l">Events</div></div>
+        <div class="ds-stat"><div class="n" id="s-challenges">12</div><div class="l">Challenges</div></div>
+        <div class="ds-stat"><div class="n" id="s-xp">0</div><div class="l">My XP</div></div>
+      </div>
+    </div>
+    <div class="progress-bar-card">
+      <div class="pb-icon">⚡</div>
+      <div class="pb-body">
+        <h4 id="pb-label">My Progress</h4>
+        <p id="pb-sub">Complete challenges to earn XP and level up!</p>
+        <div class="xp-rail"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+        <div class="xp-nums"><span id="xp-cur">0 XP</span><span id="xp-nxt">100 XP to next level</span></div>
+      </div>
+      <div class="level-chip" id="level-chip">⭐ Beginner</div>
+    </div>
+    <h3 class="section-hd" style="margin-bottom:16px;"><i class="fas fa-bolt"></i> Quick Actions</h3>
+    <div class="quick-grid">
+      <div class="quick-card" onclick="showTab('challenges')"><i class="fas fa-trophy" style="color:var(--gold)"></i><h4>Challenges</h4><p>Earn XP & badges</p></div>
+      <div class="quick-card" onclick="showTab('events')"><i class="fas fa-calendar-star" style="color:var(--accent)"></i><h4>Events</h4><p>Register now</p></div>
+      <div class="quick-card" onclick="showTab('leaderboard')"><i class="fas fa-crown" style="color:var(--purple)"></i><h4>Leaderboard</h4><p>See your rank</p></div>
+      <div class="quick-card" onclick="showTab('resources')"><i class="fas fa-book-open" style="color:var(--green)"></i><h4>Resources</h4><p>Learn & grow</p></div>
+    </div>
+  </div>
+
+  <!-- ── EVENTS TAB ── -->
+  <div class="tab-section" id="tab-events">
+    <div style="padding:36px 0 24px;"><h2 class="section-hd"><i class="fas fa-calendar-alt"></i> Upcoming Events</h2></div>
+    <div class="events-grid" id="events-grid"></div>
+  </div>
+
+  <!-- ── CHALLENGES TAB ── -->
+  <div class="tab-section" id="tab-challenges">
+    <div style="padding:36px 0 24px;">
+      <h2 class="section-hd"><i class="fas fa-trophy"></i> Coding Challenges</h2>
+      <p style="color:var(--muted);margin-bottom:24px;">Answer questions correctly to earn XP. Complete harder challenges for bigger rewards!</p>
+    </div>
+    <div class="ch-list" id="ch-list"></div>
+  </div>
+
+  <!-- ── LEADERBOARD TAB ── -->
+  <div class="tab-section" id="tab-leaderboard">
+    <div style="padding:36px 0 24px;"><h2 class="section-hd"><i class="fas fa-crown"></i> Club Leaderboard</h2></div>
+    <div class="lb-list" id="lb-list"></div>
+  </div>
+
+  <!-- ── RESOURCES TAB ── -->
+  <div class="tab-section" id="tab-resources">
+    <div style="padding:36px 0 24px;"><h2 class="section-hd"><i class="fas fa-book-open"></i> Learning Resources</h2></div>
+    <div class="res-grid">
+      <a href="https://www.w3schools.com" target="_blank" class="res-card"><i class="fas fa-globe" style="color:#4ade80"></i><h4>HTML & CSS</h4><p>Build beautiful websites</p></a>
+      <a href="https://javascript.info" target="_blank" class="res-card"><i class="fab fa-js-square" style="color:#fbbf24"></i><h4>JavaScript</h4><p>Make pages interactive</p></a>
+      <a href="https://www.python.org/about/gettingstarted/" target="_blank" class="res-card"><i class="fab fa-python" style="color:#60a5fa"></i><h4>Python</h4><p>Beginner-friendly language</p></a>
+      <a href="https://scratch.mit.edu" target="_blank" class="res-card"><i class="fas fa-puzzle-piece" style="color:#f472b6"></i><h4>Scratch</h4><p>Visual coding for starters</p></a>
+      <a href="https://github.com" target="_blank" class="res-card"><i class="fab fa-github" style="color:#e2e8f0"></i><h4>GitHub</h4><p>Store & share your code</p></a>
+      <a href="https://code.org" target="_blank" class="res-card"><i class="fas fa-laptop-code" style="color:#a78bfa"></i><h4>Code.org</h4><p>Fun coding for all ages</p></a>
+      <a href="https://leetcode.com" target="_blank" class="res-card"><i class="fas fa-code" style="color:var(--gold)"></i><h4>LeetCode</h4><p>Practice algorithms</p></a>
+      <a href="https://www.freecodecamp.org" target="_blank" class="res-card"><i class="fas fa-fire" style="color:var(--red)"></i><h4>freeCodeCamp</h4><p>Free full courses</p></a>
+    </div>
+  </div>
+
+  <!-- ── ADMIN TAB ── -->
+  <div class="tab-section" id="tab-admin">
+    <div class="admin-bar" id="admin-bar" style="margin:0 -36px;padding:12px 36px;"><i class="fas fa-crown"></i> Admin Dashboard — Glory Coding Club Management</div>
+    <div class="admin-topnav">
+      <button class="admin-nav-btn active" onclick="showAdminSec('overview')"><i class="fas fa-chart-pie"></i> Overview</button>
+      <button class="admin-nav-btn" onclick="showAdminSec('members')"><i class="fas fa-users"></i> Members</button>
+      <button class="admin-nav-btn" onclick="showAdminSec('events-admin')"><i class="fas fa-calendar"></i> Events</button>
+      <button class="admin-nav-btn" onclick="showAdminSec('registrations')"><i class="fas fa-clipboard-list"></i> Registrations</button>
+    </div>
+
+    <!-- Overview -->
+    <div class="admin-section active" id="asec-overview">
+      <div style="padding-top:24px;"></div>
+      <div class="admin-stats-row">
+        <div class="admin-stat-card"><div class="asn" id="adm-members">0</div><div class="asl">Total Members</div></div>
+        <div class="admin-stat-card"><div class="asn" id="adm-events">4</div><div class="asl">Active Events</div></div>
+        <div class="admin-stat-card"><div class="asn" id="adm-regs">0</div><div class="asl">Total Registrations</div></div>
+        <div class="admin-stat-card"><div class="asn" id="adm-challenges">0</div><div class="asl">Challenges Completed</div></div>
+      </div>
+      <h3 class="section-hd"><i class="fas fa-activity"></i> Recent Activity</h3>
+      <div id="activity-feed" style="display:flex;flex-direction:column;gap:10px;"></div>
+    </div>
+
+    <!-- Members -->
+    <div class="admin-section" id="asec-members">
+      <div style="padding-top:24px;"></div>
+      <h3 class="section-hd"><i class="fas fa-users"></i> Club Members</h3>
+      <input type="text" class="admin-search" id="member-search" placeholder="Search members..." oninput="filterMembers()">
+      <div class="tbl-wrap">
+        <table class="data-tbl">
+          <thead><tr><th>Username</th><th>Join Date</th><th>XP</th><th>Status</th><th>Actions</th></tr></thead>
+          <tbody id="members-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Events Admin -->
+    <div class="admin-section" id="asec-events-admin">
+      <div style="padding-top:24px;"></div>
+      <h3 class="section-hd"><i class="fas fa-calendar-plus"></i> Manage Events</h3>
+      <div class="admin-action-row">
+        <button class="admin-btn blue" onclick="openAddEvent()"><i class="fas fa-plus"></i> Add New Event</button>
+        <button class="admin-btn green" onclick="exportEvents()"><i class="fas fa-download"></i> Export CSV</button>
+      </div>
+      <div class="tbl-wrap">
+        <table class="data-tbl">
+          <thead><tr><th>Event Name</th><th>Date</th><th>Location</th><th>Registrations</th><th>Actions</th></tr></thead>
+          <tbody id="events-admin-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Registrations -->
+    <div class="admin-section" id="asec-registrations">
+      <div style="padding-top:24px;"></div>
+      <h3 class="section-hd"><i class="fas fa-clipboard-check"></i> Event Registrations</h3>
+      <div id="regs-container"></div>
+    </div>
+  </div>
+
+</div><!-- end pg-app -->
+
+<!-- ══════════════════════════════════════════════
+     QUIZ MODAL
+══════════════════════════════════════════════ -->
+<div class="modal-bg" id="quiz-modal">
+  <div class="modal-box quiz-box" style="position:relative;">
+    <button class="modal-close" onclick="closeQuiz()"><i class="fas fa-times"></i></button>
+    <div id="quiz-inner"></div>
+  </div>
+</div>
+
+<!-- ADD EVENT MODAL -->
+<div class="modal-bg" id="add-event-modal">
+  <div class="modal-box" style="position:relative;">
+    <button class="modal-close" onclick="closeAddEvent()"><i class="fas fa-times"></i></button>
+    <div class="modal-title"><i class="fas fa-calendar-plus" style="color:var(--accent)"></i> Add New Event</div>
+    <div class="modal-field"><label>Event Title</label><input type="text" id="new-ev-title" placeholder="e.g. Robotics Workshop"></div>
+    <div class="modal-field"><label>Description</label><textarea id="new-ev-desc" rows="3" placeholder="Describe the event..."></textarea></div>
+    <div class="modal-field"><label>Date</label><input type="text" id="new-ev-date" placeholder="e.g. Aug 10, 2025"></div>
+    <div class="modal-field"><label>Time</label><input type="text" id="new-ev-time" placeholder="e.g. 2:00 PM – 4:00 PM"></div>
+    <div class="modal-field"><label>Location</label><input type="text" id="new-ev-loc" placeholder="e.g. IT Lab, Block A"></div>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="closeAddEvent()">Cancel</button>
+      <button class="modal-save" onclick="saveNewEvent()">Save Event</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast"><i class="fas fa-check-circle"></i><span id="toast-txt">Done!</span></div>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   DATA
+═══════════════════════════════════════════════════════════ */
+let EVENTS = [
+  {id:1,title:"Hackathon: Build for Change",date:"Jun 12, 2025",time:"9:00 AM – 5:00 PM",location:"IT Lab, Block A",desc:"24-hour team challenge to build a solution for a real community problem. Form teams of 3–4!",icon:"fas fa-laptop-code"},
+  {id:2,title:"Web Design Workshop",date:"Jun 20, 2025",time:"2:00 PM – 4:00 PM",location:"Computer Room 2",desc:"Learn HTML, CSS & JavaScript in this hands-on beginner-friendly workshop for all skill levels.",icon:"fas fa-paint-brush"},
+  {id:3,title:"Python Game Jam",date:"Jul 5, 2025",time:"3:00 PM – 6:00 PM",location:"Multi-purpose Hall",desc:"Create a mini game in Python! Prizes for best gameplay, best graphics, and most creative idea.",icon:"fab fa-python"},
+  {id:4,title:"AI & Robotics Demo Day",date:"Jul 18, 2025",time:"10:00 AM – 1:00 PM",location:"Science Block",desc:"See cutting-edge AI and robotics demos. Guest speakers from local tech companies!",icon:"fas fa-robot"}
+];
+
+const CHALLENGES = [
+  {id:"q1",title:"Hello, World!",diff:"easy",pts:50,icon:"fas fa-star",desc:"Your very first coding challenge",questions:[
+    {q:"What does  print('Hello, World!')  output?",opts:["Hello, World!","hello, world!","Nothing","Error"],ans:0,exp:"print() outputs exactly what's in the quotes. Python is case-sensitive!"},
+    {q:"Which symbol starts a comment in Python?",opts:["//","/* */","#","--"],ans:2,exp:"# starts a comment in Python. Everything after it on that line is ignored by the computer."},
+    {q:"What does  print(2 + 3)  display?",opts:["2 + 3","23","5","Error"],ans:2,exp:"Python evaluates the math inside print(). 2 + 3 = 5."}
+  ]},
+  {id:"q2",title:"Web Builder",diff:"easy",pts:75,icon:"fas fa-globe",desc:"Test your HTML & CSS knowledge",questions:[
+    {q:"Which HTML tag creates the BIGGEST heading?",opts:["<h6>","<h1>","<big>","<heading>"],ans:1,exp:"<h1> is the biggest heading. They go from h1 (biggest) down to h6 (smallest)."},
+    {q:"Which CSS property changes text colour?",opts:["font-color","text-color","color","foreground"],ans:2,exp:"The property is simply 'color'. Example: color: red;"},
+    {q:"What does HTML stand for?",opts:["Hyper Text Markup Language","High Tech Modern Language","Hyper Transfer Markup Logic","How To Make Layouts"],ans:0,exp:"HTML = HyperText Markup Language. It's the skeleton of every webpage!"},
+    {q:"Which HTML tag adds a clickable link?",opts:["<link>","<a>","<href>","<url>"],ans:1,exp:"The <a> (anchor) tag creates links. Example: <a href='https://...'>Click me</a>"}
+  ]},
+  {id:"q3",title:"Algorithm Apprentice",diff:"medium",pts:150,icon:"fas fa-project-diagram",desc:"Loops, conditions & logic puzzles",questions:[
+    {q:"What does  for i in range(3): print(i)  output?",opts:["1 2 3","0 1 2","0 1 2 3","1 2"],ans:1,exp:"range(3) gives 0, 1, 2. Python's range starts at 0 and excludes the end number."},
+    {q:"A loop that never stops is called a(n)...",opts:["Fast loop","Infinite loop","Turbo loop","Mega loop"],ans:1,exp:"An infinite loop runs forever because its exit condition is never met!"},
+    {q:"What is the purpose of an 'else' block?",opts:["Runs if condition is True","Runs if condition is False","Always runs","Skips the if block"],ans:1,exp:"else runs when the if condition is False — it's the 'otherwise' path."},
+    {q:"Which data structure is LIFO (Last In, First Out)?",opts:["Queue","Stack","Array","Linked List"],ans:1,exp:"A Stack is LIFO — like a stack of plates. You add and remove from the top!"},
+    {q:"What is the time complexity of linear search?",opts:["O(1)","O(log n)","O(n)","O(n²)"],ans:2,exp:"O(n) means in the worst case you check every item once — linear search!"}
+  ]},
+  {id:"q4",title:"Cybersecurity Scout",diff:"medium",pts:200,icon:"fas fa-shield-alt",desc:"Stay safe online — know the threats",questions:[
+    {q:"What makes a password strong?",opts:["password123","Your pet's name","Mix of letters, numbers, symbols (e.g. T#9xQ!)","Your birthdate"],ans:2,exp:"Strong passwords are long, random, and use uppercase, lowercase, numbers, and symbols. Never use personal info!"},
+    {q:"What is phishing?",opts:["A sport","Trick emails/messages that steal your info","A programming language","A type of virus"],ans:1,exp:"Phishing tricks you into sharing passwords or clicking dangerous links by pretending to be someone you trust."},
+    {q:"What does HTTPS mean in a URL?",opts:["The site is fast","The connection is encrypted","The site is popular","The site is fun"],ans:1,exp:"HTTPS means your connection is encrypted and secure. Always look for the padlock icon!"},
+    {q:"What should you do with a suspicious password-requesting email?",opts:["Reply with password","Click all links","Delete and report it","Forward to friends"],ans:2,exp:"Legitimate services NEVER ask for your password by email. Always delete and report suspicious emails!"}
+  ]},
+  {id:"q5",title:"AI Explorer",diff:"hard",pts:300,icon:"fas fa-brain",desc:"Dive into artificial intelligence",questions:[
+    {q:"What is Machine Learning?",opts:["Robots learning to walk","Teaching computers to learn from data without explicit programming","A programming language","A type of computer hardware"],ans:1,exp:"Machine Learning lets computers improve at tasks by finding patterns in data — no manual programming for each case!"},
+    {q:"What is a neural network inspired by?",opts:["Computer chips","The internet","The human brain","Electrical circuits"],ans:2,exp:"Artificial Neural Networks are inspired by how neurons in our brains connect and communicate."},
+    {q:"What does 'training' an AI model mean?",opts:["Physical exercises","Showing it examples so it learns patterns","Writing code for every situation","Adding more RAM"],ans:1,exp:"Training means feeding the model lots of labeled examples so it learns to recognize patterns and predict outcomes."},
+    {q:"Which is an example of AI in everyday life?",opts:["Calculator","Light switch","A chatbot like ChatGPT","A keyboard"],ans:2,exp:"Chatbots use Natural Language Processing (NLP) — a branch of AI — to understand and generate human text."},
+    {q:"What is the Turing Test?",opts:["A speed test","A test if AI can fool a human in conversation","A memory test","A programming exam"],ans:1,exp:"Proposed by Alan Turing in 1950: if an AI can chat indistinguishably from a human, it passes the Turing Test!"}
+  ]},
+  {id:"q6",title:"Database Basics",diff:"hard",pts:350,icon:"fas fa-database",desc:"SQL, tables, and data storage",questions:[
+    {q:"What does SQL stand for?",opts:["Structured Query Language","Simple Question Logic","System Queue List","Stored Question Language"],ans:0,exp:"SQL = Structured Query Language. It's the standard language for working with databases!"},
+    {q:"Which SQL command retrieves data from a table?",opts:["INSERT","UPDATE","SELECT","DELETE"],ans:2,exp:"SELECT retrieves data. Example: SELECT * FROM students; — gets all rows from the students table."},
+    {q:"What is a PRIMARY KEY in a database?",opts:["The most important column","A unique identifier for each row","The first column","A password for the table"],ans:1,exp:"A PRIMARY KEY uniquely identifies each row in a table. No two rows can have the same primary key!"},
+    {q:"What does  WHERE  do in a SQL query?",opts:["Sorts results","Filters rows based on a condition","Joins tables","Counts rows"],ans:1,exp:"WHERE filters rows. Example: SELECT * FROM students WHERE grade = 'A'; — only returns A-grade students."}
+  ]},
+  {id:"q7",title:"Code Breaker",diff:"expert",pts:500,icon:"fas fa-lock",desc:"Advanced logic, binary & complexity",questions:[
+    {q:"What is recursion in programming?",opts:["A backwards loop","A function that calls itself","A type of variable","A sorting method"],ans:1,exp:"Recursion is when a function calls itself! It needs a base case to eventually stop."},
+    {q:"What is the decimal value of binary 1010?",opts:["8","10","12","16"],ans:1,exp:"1010 in binary = (1×8)+(0×4)+(1×2)+(0×1) = 8+2 = 10. Each bit doubles in value from right to left!"},
+    {q:"What does Big O notation measure?",opts:["Code file size","Algorithm efficiency relative to input size","Number of bugs","RAM installed"],ans:1,exp:"Big O describes how runtime grows as input grows. O(1) is constant, O(n) is linear, O(n²) is quadratic."},
+    {q:"Difference between compiler and interpreter?",opts:["No difference","Compilers translate all at once; interpreters translate line-by-line","Interpreters are always faster","Compilers only work with Python"],ans:1,exp:"Compilers (C++) translate all code first then run. Interpreters (Python) translate and run line by line."},
+    {q:"Which sorting algorithm has best average complexity?",opts:["Bubble Sort O(n²)","Selection Sort O(n²)","Merge/Quick Sort O(n log n)","Insertion Sort O(n²)"],ans:2,exp:"Merge Sort and Quick Sort achieve O(n log n) on average — much faster than O(n²) for large datasets!"}
+  ]}
+];
+
+const DEMO_LB = [
+  {name:"Bereket T.",xp:1250,badges:["🏆 Champion","⚡ Speed Coder"],color:"#1a56db"},
+  {name:"Tigist M.",xp:1100,badges:["🔥 Streak x7","🛡 Security Pro"],color:"#7c3aed"},
+  {name:"Dawit H.",xp:980,badges:["🤖 AI Explorer","📐 Algorithm Ace"],color:"#059669"},
+  {name:"Hana A.",xp:850,badges:["🌐 Web Wizard"],color:"#dc2626"},
+  {name:"Samuel K.",xp:720,badges:["🐍 Python Pro"],color:"#d97706"},
+  {name:"Yohannes F.",xp:610,badges:["🌟 Rising Star"],color:"#0891b2"}
+];
+
+const LEVELS=[
+  {min:0,max:100,label:"⭐ Beginner"},{min:100,max:300,label:"💻 Coder"},
+  {min:300,max:600,label:"🔥 Developer"},{min:600,max:1000,label:"⚡ Hacker"},
+  {min:1000,max:2000,label:"🚀 Engineer"},{min:2000,max:99999,label:"👑 Master"}
+];
+
+/* ═══════════════════════════════════════════════════════════
+   STATE
+═══════════════════════════════════════════════════════════ */
+let currentUser=null, isAdmin=false;
+let userXP=0;
+let completedChallenges=new Set();
+let registeredEvents=new Set();
+let quizState=null;
+let toastTimer=null;
+
+/* ═══════════════════════════════════════════════════════════
+   UTILS
+═══════════════════════════════════════════════════════════ */
+function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById('pg-'+id).classList.add('active');}
+function getUsers(){try{return JSON.parse(localStorage.getItem('gcc_users')||'{}')}catch{return{}}}
+function saveUsers(u){localStorage.setItem('gcc_users',JSON.stringify(u))}
+function showError(t){const b=document.getElementById('err-box');b.style.display='flex';b.querySelector('span').textContent=t;}
+function showOk(t){const b=document.getElementById('ok-box');b.style.display='flex';b.querySelector('span').textContent=t;}
+function clearMsgs(){document.getElementById('err-box').style.display='none';document.getElementById('ok-box').style.display='none';}
+function togglePw(id,btn){const i=document.getElementById(id);const h=i.type==='password';i.type=h?'text':'password';btn.querySelector('i').className=h?'fas fa-eye-slash':'fas fa-eye';}
+let toastQ=[];
+function showToast(msg,type='success'){
+  const t=document.getElementById('toast'),s=document.getElementById('toast-txt');
+  t.className='show '+type; s.textContent=msg;
+  t.querySelector('i').className=type==='gold'?'fas fa-star':type==='info'?'fas fa-info-circle':'fas fa-check-circle';
+  clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove('show'),3500);
+}
+function fireParticles(x,y){
+  for(let i=0;i<12;i++){
+    const p=document.createElement('div');
+    const colors=['#00d4ff','#fbbf24','#10b981','#818cf8','#f59e0b'];
+    const c=colors[Math.floor(Math.random()*colors.length)];
+    const size=Math.random()*8+4;
+    p.className='particle';
+    p.style.cssText=`left:${x+Math.random()*60-30}px;top:${y}px;width:${size}px;height:${size}px;background:${c};animation-delay:${Math.random()*.3}s;`;
+    document.body.appendChild(p);
+    setTimeout(()=>p.remove(),1400);
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   AUTH
+═══════════════════════════════════════════════════════════ */
+function switchAuthTab(tab){
+  document.querySelectorAll('.auth-tab').forEach((b,i)=>b.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='register')));
+  document.getElementById('form-login').style.display=tab==='login'?'block':'none';
+  document.getElementById('form-register').style.display=tab==='register'?'block':'none';
+  clearMsgs();
+}
+
+function doLogin(){
+  clearMsgs();
+  const u=document.getElementById('l-user').value.trim();
+  const p=document.getElementById('l-pass').value;
+  if(!u||!p){showError('Please enter username and password.');return;}
+  if(u==='admin'&&p==='admin123'){launchUser('Admin',true);return;}
+  const users=getUsers();
+  if(!users[u]){showError('Username not found. Please register first!');return;}
+  if(users[u].password!==btoa(p)){showError('Incorrect password. Try again!');return;}
+  launchUser(u,false);
+}
+
+function doRegister(){
+  clearMsgs();
+  const u=document.getElementById('r-user').value.trim();
+  const p=document.getElementById('r-pass').value;
+  const c=document.getElementById('r-confirm').value;
+  if(!u||!p){showError('Please fill in all fields.');return;}
+  if(u.length<3){showError('Username must be at least 3 characters.');return;}
+  if(p.length<4){showError('Password must be at least 4 characters.');return;}
+  if(p!==c){showError('Passwords do not match!');return;}
+  const users=getUsers();
+  if(users[u]){showError('Username already taken — choose another!');return;}
+  users[u]={password:btoa(p),xp:0,joined:new Date().toISOString()};
+  saveUsers(users);
+  showOk('Account created! Welcome aboard!');
+  setTimeout(()=>launchUser(u,false),900);
+}
+
+function launchUser(username,admin){
+  currentUser=username; isAdmin=admin;
+  localStorage.setItem('gcc_loggedIn',username);
+  localStorage.setItem('gcc_isAdmin',admin?'1':'0');
+  const users=getUsers();
+  userXP=(users[username]&&!admin)?users[username].xp||0:admin?9999:0;
+  completedChallenges=new Set(JSON.parse(localStorage.getItem('gcc_done_'+username)||'[]'));
+  registeredEvents=new Set(JSON.parse(localStorage.getItem('gcc_revents_'+username)||'[]').map(Number));
+  // Show welcome splash first
+  document.getElementById('w-username').textContent=username;
+  animateWelcomeCounters();
+  showPage('welcome');
+}
+
+function enterApp(){
+  showPage('app');
+  document.getElementById('hdr-name').textContent=currentUser;
+  document.getElementById('hdr-ava').textContent=currentUser[0].toUpperCase();
+  if(isAdmin){document.getElementById('admin-nav-btn').style.display='flex';}
+  renderAll();
+  animateDashCounters();
+  setTimeout(updateXPBar,300);
+}
+
+function doLogout(){
+  localStorage.removeItem('gcc_loggedIn');
+  localStorage.removeItem('gcc_isAdmin');
+  currentUser=null; isAdmin=false; userXP=0;
+  showPage('login');
+}
+
+/* ═══════════════════════════════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════════════════════════════ */
+function showTab(id){
+  document.querySelectorAll('.tab-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.nav-pill').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  document.querySelectorAll('.nav-pill').forEach(b=>{if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+id+"'"))b.classList.add('active');});
+  if(id==='admin')renderAdminAll();
+  if(id==='leaderboard')renderLeaderboard();
+}
+
+function showAdminSec(id){
+  document.querySelectorAll('.admin-section').forEach(s=>s.classList.remove('active'));
+  document.querySelectorAll('.admin-nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('asec-'+id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  if(id==='members')renderAdminMembers();
+  if(id==='events-admin')renderAdminEvents();
+  if(id==='registrations')renderAdminRegs();
+  if(id==='overview')renderAdminOverview();
+}
+
+/* ═══════════════════════════════════════════════════════════
+   RENDER MAIN
+═══════════════════════════════════════════════════════════ */
+function renderAll(){renderEvents();renderChallenges();renderLeaderboard();}
+
+function renderEvents(){
+  document.getElementById('events-grid').innerHTML=EVENTS.map(e=>{
+    const done=registeredEvents.has(e.id);
+    return `<div class="ev-card">
+      <div class="ev-date"><i class="${e.icon}"></i>&nbsp;&nbsp;${e.date}</div>
+      <h4>${e.title}</h4><p>${e.desc}</p>
+      <div class="ev-meta"><span><i class="fas fa-clock"></i>${e.time}</span><span><i class="fas fa-map-marker-alt"></i>${e.location}</span></div>
+      <button class="ev-reg-btn${done?' done':''}" onclick="toggleEventReg(${e.id},this)">
+        ${done?'<i class="fas fa-check-circle"></i> Registered!':'<i class="fas fa-plus-circle"></i> Register for this Event'}
+      </button>
+    </div>`;
+  }).join('');
+}
+
+function toggleEventReg(id,btn){
+  if(registeredEvents.has(id)){
+    registeredEvents.delete(id);
+    btn.className='ev-reg-btn';
+    btn.innerHTML='<i class="fas fa-plus-circle"></i> Register for this Event';
+    showToast('Unregistered from event.','info');
+  } else {
+    registeredEvents.add(id);
+    btn.className='ev-reg-btn done';
+    btn.innerHTML='<i class="fas fa-check-circle"></i> Registered!';
+    addXP(25,'Event registration +25 XP! 🎉');
+    fireParticles(btn.getBoundingClientRect().left+50,btn.getBoundingClientRect().top);
+  }
+  localStorage.setItem('gcc_revents_'+currentUser,JSON.stringify([...registeredEvents]));
+  logActivity(`${currentUser} registered for an event`);
+}
+
+function renderChallenges(){
+  document.getElementById('ch-list').innerHTML=CHALLENGES.map(ch=>{
+    const done=completedChallenges.has(ch.id);
+    return `<div class="ch-card" onclick="startChallenge('${ch.id}')">
+      <div class="ch-ico ${ch.diff}"><i class="${ch.icon}"></i></div>
+      <div class="ch-body">
+        <h4>${done?'✅ ':''}${ch.title}</h4>
+        <p>${ch.desc} &nbsp;·&nbsp; ${ch.questions.length} questions</p>
+      </div>
+      <div class="ch-right">
+        <div class="diff-tag ${ch.diff}">${ch.diff.toUpperCase()}</div>
+        <div class="ch-pts"><strong>+${ch.pts}</strong> XP</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderLeaderboard(){
+  const myEntry={name:currentUser+' (You)',xp:userXP,badges:['🚀 Active'],color:'#00d4ff',isMe:true};
+  const all=[...DEMO_LB,myEntry].sort((a,b)=>b.xp-a.xp).slice(0,9);
+  const rnk=['🥇','🥈','🥉'],rcls=['rank-gold','rank-silver','rank-bronze'];
+  document.getElementById('lb-list').innerHTML=all.map((p,i)=>`
+    <div class="lb-row${p.isMe?' me':''}">
+      <div class="lb-rank-num ${rcls[i]||'rank-other'}">${rnk[i]||i+1}</div>
+      <div class="lb-ava" style="background:${p.color||'#1a56db'}">${p.name[0]}</div>
+      <div class="lb-info"><div class="name">${p.name}</div>
+        <div class="lb-badges">${p.badges.map(b=>`<span class="lb-badge">${b}</span>`).join('')}</div>
+      </div>
+      <div class="lb-xp">${p.xp.toLocaleString()}<small>XP</small></div>
+    </div>`).join('');
+  document.getElementById('s-members').textContent=DEMO_LB.length+1;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   XP SYSTEM
+═══════════════════════════════════════════════════════════ */
+function addXP(pts,msg){
+  userXP+=pts;
+  const users=getUsers();
+  if(users[currentUser]&&!isAdmin){users[currentUser].xp=userXP;saveUsers(users);}
+  showToast(msg||`+${pts} XP earned! 🎉`,'gold');
+  updateXPBar();
+  renderLeaderboard();
+  document.getElementById('s-xp').textContent=userXP;
+}
+
+function updateXPBar(){
+  const lv=LEVELS.find(l=>userXP>=l.min&&userXP<l.max)||LEVELS[LEVELS.length-1];
+  const pct=Math.min(100,((userXP-lv.min)/(lv.max-lv.min))*100);
+  document.getElementById('xp-fill').style.width=pct+'%';
+  document.getElementById('xp-cur').textContent=userXP+' XP';
+  document.getElementById('xp-nxt').textContent=userXP>=lv.max?'MAX LEVEL!':(lv.max-userXP)+' XP to next level';
+  document.getElementById('level-chip').textContent=lv.label;
+  document.getElementById('pb-label').textContent='My Progress — '+lv.label;
+  document.getElementById('pb-sub').textContent=`Keep going, ${currentUser}! You're doing great.`;
+  document.getElementById('s-xp').textContent=userXP;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   QUIZ ENGINE
+═══════════════════════════════════════════════════════════ */
+function startChallenge(id){
+  const ch=CHALLENGES.find(c=>c.id===id);
+  if(!ch)return;
+  quizState={ch,qIndex:0,score:0,alreadyDone:completedChallenges.has(id)};
+  document.getElementById('quiz-modal').classList.add('open');
+  renderQ();
+}
+function closeQuiz(){document.getElementById('quiz-modal').classList.remove('open');quizState=null;}
+
+function renderQ(){
+  const {ch,qIndex}=quizState;
+  const q=ch.questions[qIndex];
+  const pct=(qIndex/ch.questions.length)*100;
+  const isCode=q.q.includes('\n')||q.q.includes('print(');
+  document.getElementById('quiz-inner').innerHTML=`
+    <div style="margin-bottom:8px;"><span style="font-size:1.1rem;font-weight:800;color:var(--accent)">${ch.title}</span>
+      <span style="font-size:.8rem;color:var(--muted);margin-left:10px;">${ch.diff.toUpperCase()} · +${ch.pts} XP</span></div>
+    <div class="qz-prog-wrap"><div class="qz-prog-fill" style="width:${pct}%"></div></div>
+    <div class="qz-qnum">Question ${qIndex+1} of ${ch.questions.length}</div>
+    <div class="qz-q${isCode?' code-q':''}">${q.q.replace(/\n/g,'<br>')}</div>
+    <div class="qz-opts">${q.opts.map((o,i)=>`<button class="qz-opt" onclick="pickAns(${i})">${o}</button>`).join('')}</div>
+    <div class="qz-explain" id="qz-exp"></div>
+    <button class="qz-next" id="qz-nxt" onclick="nextQ()">
+      ${qIndex+1<ch.questions.length?'Next Question →':'See My Results 🎉'}
+    </button>`;
+}
+
+function pickAns(idx){
+  const {ch,qIndex}=quizState;
+  const q=ch.questions[qIndex];
+  const opts=document.querySelectorAll('.qz-opt');
+  opts.forEach(o=>o.classList.add('disabled'));
+  const ok=idx===q.ans;
+  opts[idx].classList.add(ok?'correct':'wrong');
+  if(!ok)opts[q.ans].classList.add('correct');
+  if(ok){quizState.score++;fireParticles(window.innerWidth/2,window.innerHeight/2);}
+  const exp=document.getElementById('qz-exp');
+  exp.style.display='block'; exp.className='qz-explain '+(ok?'ok':'no');
+  exp.innerHTML=(ok?'✅ Correct! ':'❌ Not quite — ')+q.exp;
+  document.getElementById('qz-nxt').style.display='block';
+}
+
+function nextQ(){
+  quizState.qIndex++;
+  if(quizState.qIndex>=quizState.ch.questions.length)showResult();
+  else renderQ();
+}
+
+function showResult(){
+  const {ch,score,alreadyDone}=quizState;
+  const total=ch.questions.length;
+  const pct=Math.round((score/total)*100);
+  const passed=score>=Math.ceil(total/2);
+  let xpEarned=0;
+  if(passed&&!alreadyDone){xpEarned=ch.pts;completedChallenges.add(ch.id);localStorage.setItem('gcc_done_'+currentUser,JSON.stringify([...completedChallenges]));logActivity(`${currentUser} completed '${ch.title}'`);}
+  const msgs=['Keep practicing! 💪','Getting there! 📖','Nice work! 🌟','Great job! 🔥','Almost perfect! ⚡','PERFECT SCORE! 👑'];
+  const mi=Math.min(Math.floor(pct/20),5);
+  document.getElementById('quiz-inner').innerHTML=`
+    <div style="text-align:center;padding:10px 0;">
+      <div class="result-circle">${score}/${total}</div>
+      <div class="result-msg">${msgs[mi]} — ${pct}% correct</div>
+      ${xpEarned?`<div class="result-xp">🏆 +${xpEarned} XP Earned!</div>`:
+        alreadyDone?'<div class="result-xp" style="color:var(--dim)">Already completed (XP not re-awarded)</div>':
+        passed?'':'<div class="result-xp" style="color:var(--dim)">Score ≥ 50% to earn XP</div>'}
+      <button class="result-back" onclick="closeQuiz();renderChallenges()">← Back to Challenges</button>
+    </div>`;
+  if(xpEarned)setTimeout(()=>{addXP(xpEarned,`🏆 ${ch.title} complete! +${xpEarned} XP`);},400);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   ADMIN
+═══════════════════════════════════════════════════════════ */
+function renderAdminAll(){renderAdminOverview();}
+
+function renderAdminOverview(){
+  const users=getUsers();
+  const mcount=Object.keys(users).length;
+  const totalDone=Object.keys(users).reduce((a,u)=>{
+    try{return a+(JSON.parse(localStorage.getItem('gcc_done_'+u)||'[]').length)}catch{return a;}
+  },0);
+  const totalRegs=Object.keys(users).reduce((a,u)=>{
+    try{return a+(JSON.parse(localStorage.getItem('gcc_revents_'+u)||'[]').length)}catch{return a;}
+  },0);
+  document.getElementById('adm-members').textContent=mcount;
+  document.getElementById('adm-events').textContent=EVENTS.length;
+  document.getElementById('adm-regs').textContent=totalRegs;
+  document.getElementById('adm-challenges').textContent=totalDone;
+  // Activity feed
+  const feed=JSON.parse(localStorage.getItem('gcc_activity')||'[]').slice(-8).reverse();
+  document.getElementById('activity-feed').innerHTML=feed.length?feed.map(a=>`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:12px;padding:13px 18px;display:flex;align-items:center;gap:12px;">
+      <i class="fas fa-circle" style="font-size:.5rem;color:var(--accent);"></i>
+      <span style="font-size:.88rem;">${a.msg}</span>
+      <span style="margin-left:auto;font-size:.75rem;color:var(--muted);">${a.time}</span>
+    </div>`).join(''):'<p style="color:var(--muted)">No activity yet. Activity will appear here as members use the app.</p>';
+}
+
+function renderAdminMembers(){
+  const users=getUsers();
+  const rows=Object.entries(users).map(([u,d])=>{
+    const joined=d.joined?new Date(d.joined).toLocaleDateString():'N/A';
+    return `<tr>
+      <td><strong>${u}</strong></td>
+      <td>${joined}</td>
+      <td style="color:var(--accent);font-family:'JetBrains Mono',monospace;font-weight:700;">${d.xp||0}</td>
+      <td><span class="badge-pill green">Active</span></td>
+      <td><button class="del-btn" onclick="deleteMember('${u}')"><i class="fas fa-trash"></i> Remove</button></td>
+    </tr>`;
+  });
+  document.getElementById('members-tbody').innerHTML=rows.length?rows.join(''):'<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px;">No members registered yet.</td></tr>';
+  document.getElementById('adm-members').textContent=Object.keys(users).length;
+}
+
+function filterMembers(){
+  const q=document.getElementById('member-search').value.toLowerCase();
+  document.querySelectorAll('#members-tbody tr').forEach(r=>{
+    r.style.display=r.textContent.toLowerCase().includes(q)?'':'none';
+  });
+}
+
+function deleteMember(u){
+  if(!confirm(`Remove member "${u}"? This cannot be undone.`))return;
+  const users=getUsers();delete users[u];saveUsers(users);
+  localStorage.removeItem('gcc_done_'+u);localStorage.removeItem('gcc_revents_'+u);
+  renderAdminMembers();showToast('Member removed.','info');
+}
+
+function renderAdminEvents(){
+  document.getElementById('events-admin-tbody').innerHTML=EVENTS.map(e=>{
+    const cnt=Object.keys(getUsers()).reduce((a,u)=>{
+      try{const r=JSON.parse(localStorage.getItem('gcc_revents_'+u)||'[]').map(Number);return a+(r.includes(e.id)?1:0);}catch{return a;}
+    },0);
+    return `<tr>
+      <td><strong>${e.title}</strong></td>
+      <td style="font-family:'JetBrains Mono',monospace;font-size:.85rem;">${e.date}</td>
+      <td>${e.location}</td>
+      <td><span class="badge-pill blue">${cnt} registered</span></td>
+      <td><button class="del-btn" onclick="deleteEvent(${e.id})"><i class="fas fa-trash"></i></button></td>
+    </tr>`;
+  }).join('');
+}
+
+function deleteEvent(id){
+  if(!confirm('Delete this event?'))return;
+  EVENTS=EVENTS.filter(e=>e.id!==id);renderAdminEvents();renderEvents();showToast('Event deleted.','info');
+}
+
+function renderAdminRegs(){
+  const html=EVENTS.map(e=>{
+    const regs=Object.keys(getUsers()).filter(u=>{
+      try{return JSON.parse(localStorage.getItem('gcc_revents_'+u)||'[]').map(Number).includes(e.id);}catch{return false;}
+    });
+    return `<div class="ev-reg-block">
+      <div class="ev-reg-hdr">
+        <h4>${e.title}</h4>
+        <span class="badge-pill blue">${regs.length} registrant${regs.length!==1?'s':''}</span>
+      </div>
+      ${regs.length?regs.map(u=>`<div class="reg-person"><span><i class="fas fa-user" style="color:var(--accent);margin-right:8px;"></i>${u}</span><span class="badge-pill green">Registered</span></div>`).join(''):'<p style="color:var(--muted);font-size:.85rem;">No registrations yet.</p>'}
+    </div>`;
+  }).join('');
+  document.getElementById('regs-container').innerHTML=html;
+}
+
+function openAddEvent(){document.getElementById('add-event-modal').classList.add('open');}
+function closeAddEvent(){document.getElementById('add-event-modal').classList.remove('open');}
+
+function saveNewEvent(){
+  const t=document.getElementById('new-ev-title').value.trim();
+  const d=document.getElementById('new-ev-date').value.trim();
+  const ti=document.getElementById('new-ev-time').value.trim();
+  const l=document.getElementById('new-ev-loc').value.trim();
+  const desc=document.getElementById('new-ev-desc').value.trim();
+  if(!t||!d){showToast('Please fill in title and date.','info');return;}
+  const newId=Math.max(...EVENTS.map(e=>e.id),0)+1;
+  EVENTS.push({id:newId,title:t,date:d,time:ti||'TBD',location:l||'TBD',desc:desc||'',icon:'fas fa-calendar'});
+  closeAddEvent();renderAdminEvents();renderEvents();
+  showToast('Event added! ✅','success');
+  ['new-ev-title','new-ev-date','new-ev-time','new-ev-loc','new-ev-desc'].forEach(id=>document.getElementById(id).value='');
+}
+
+function exportEvents(){
+  const csv=['Event,Date,Time,Location',...EVENTS.map(e=>`"${e.title}","${e.date}","${e.time}","${e.location}"`)].join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);
+  a.download='glory_events.csv';a.click();showToast('Events exported! 📥','info');
+}
+
+function logActivity(msg){
+  const feed=JSON.parse(localStorage.getItem('gcc_activity')||'[]');
+  feed.push({msg,time:new Date().toLocaleTimeString()});
+  if(feed.length>30)feed.splice(0,feed.length-30);
+  localStorage.setItem('gcc_activity',JSON.stringify(feed));
+}
+
+/* ═══════════════════════════════════════════════════════════
+   WELCOME COUNTERS
+═══════════════════════════════════════════════════════════ */
+function animateWelcomeCounters(){
+  [['w-members',150],['w-events',EVENTS.length],['w-challenges',CHALLENGES.length]].forEach(([id,target])=>{
+    let v=0;const step=Math.ceil(target/40)||1;
+    const iv=setInterval(()=>{v=Math.min(v+step,target);const el=document.getElementById(id);if(el)el.textContent=v;if(v>=target)clearInterval(iv);},40);
+  });
+}
+function animateDashCounters(){
+  const mcount=Object.keys(getUsers()).length+6;
+  [['s-members',mcount],['s-events',EVENTS.length],['s-challenges',CHALLENGES.length]].forEach(([id,target])=>{
+    let v=0;const step=Math.ceil(target/40)||1;
+    const iv=setInterval(()=>{v=Math.min(v+step,target);const el=document.getElementById(id);if(el)el.textContent=v;if(v>=target)clearInterval(iv);},40);
+  });
+}
+
+// Auto-login
+const savedUser=localStorage.getItem('gcc_loggedIn');
+const savedAdmin=localStorage.getItem('gcc_isAdmin')==='1';
+if(savedUser){launchUser(savedUser,savedAdmin);}
+
+// Enter key support
+document.addEventListener('keydown',e=>{
+  if(e.key!=='Enter')return;
+  const lf=document.getElementById('form-login'),rf=document.getElementById('form-register');
+  if(lf&&lf.style.display!=='none')doLogin();
+  else if(rf&&rf.style.display!=='none')doRegister();
+});
+
+// Typing animation cycling
+const typingLines=["print('Ready to code? Let\\'s go!')", "console.log('Family Day 2025! 🎉')", "puts 'Glory Coding Club rocks!'", "echo 'Join us and build the future!'", "System.out.println('Hello, Innovator!');"];
+let tIdx=0;
+setInterval(()=>{tIdx=(tIdx+1)%typingLines.length;const el=document.getElementById('typing-line');if(el)el.textContent=typingLines[tIdx];},4000);
+</script>
+</body>
+</html>
